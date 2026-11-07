@@ -39,7 +39,15 @@
 <!-- The path a submission takes, from arriving to the label a reader sees.
      Six or seven steps — this is the trace you wrote in Milestone 1. -->
 
+A piece of text goes through seven steps between arriving and getting a label:
 
+1. **A writer sends it in.** A POST to '/submit' with JSON '{"text": "...", "creator_id": "..."}'. This adds the raw input and who sent it.
+2. **The '/submit' handler checks it (app.py::submit)** If 'text' is missing, empty, or not a string, it stops here with a 400 error. This adds a guarantee that everything after this point has real text to work with. 
+3. **The model signal read it (detector.py::model_signal)** gpt2 runs locally and measures how predictable the text is (perplexity), then squashes that onto 0-1. This adds "model_score", where higher means more likely AI
+4. **The style signal measures it (stylometry.py::style_signal)** It looks at how much sentence length varies, how much vocabulary repeats and how punctuation is used, without reading the meaning. This adds 'style_score', also 0-1 with a higher number meaning more likely AI. 
+5. **The two scores are combined (scoring.py::combine_signals)** This adds one 'confidence' number from 0 (confidently human) to 1 (confidently AI).
+6. **The number becomes words (scoring.py::score_to_label)** The confidence falls into one of three bands. This adds 'guess' ("human"/"unsure"/"ai")  and the 'label' sentence a reader actually sees. 
+7. **The decision is logged and returned (audit.py::log_decision)** The system gives the submission a unique 'content_id', writes it to the audit log with both signal scores, and sends everything back in the response. The 'content_id' is what lets the writer appeal later through '/appeal'.
 
 ---
 
@@ -53,19 +61,19 @@
 
 ### Signal one — the model signal
 
-**What it measures:**
+**What it measures:** How predictable the text is to a language model (gpt2). The model reads the text one word at a time and we measure how surprised it is by each next word. This is called perplexity. Low perplexity means the text is easy to predict, which maps to a higher AI score. 
 
-**Why that might differ between human and AI writing:**
+**Why that might differ between human and AI writing:** AN AI writes by repeatedly choosing a likely next word, so its output is text a model finds easy to predict. People's word choices are less easy to predict, as they often have odd word choices, an "aha" moment, or sudden turns in conversation topic. That makes human text more surprising to the model. 
 
-**What it can't see:**
+**What it can't see:** Predictable doesn't mean macine-written. Some people can write in a very predictable manner just because they use common words often. This can be seen in people who are writing in a second language and who stick to words they're sure of, or anyone writing plainly on purpose. 
 
 ### Signal two — the style signal
 
-**What it measures:**
+**What it measures:** The shape of the text, not its meaning. Three measures: how much sentence length varies, how much vocabulary repeats, and how much varied pronunciation there is. They are combined into a 0-1 score, where a higher number means more likely AI. 
 
-**Why that might differ between human and AI writing:**
+**Why that might differ between human and AI writing:** AI sentences tends to be more even, medium-length, and include safe vocabulary. Human writing is more unpredictable, where sentence length can vary drastically and they can suddenly include a uncommon word in their vocabulary. 
 
-**What it can't see:**
+**What it can't see:** It can't read and see the meaning. It has no idea what the text says, so anything that changes the shape without changing the substance moves the score. Someone could add typos and make some sentences shorter to make the AI text seem more human. 
 
 ### The combining rule
 
