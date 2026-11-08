@@ -219,6 +219,7 @@ def submit():
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
+        guess="unsure",
         model_score=model_score,
         status="decided",
     )

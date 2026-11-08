@@ -211,13 +211,51 @@ A piece of text goes through seven steps between arriving and getting a label:
      two off the response, so leaving them out costs you next unit's
      diagnostics. -->
 
+
+
 ```bash
 $ curl -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
-  -d '{"text": "...", "creator_id": "..."}'
+  -d '{"text": "I am so excited for Christmas! I cannot wait to see my family and to drink hot chocolate and watch a movie with them. I also cannot wait to see my cat. I miss her so much.", "creator_id": "sophia"}'
 ```
 
-```json
+```curl "http://127.0.0.1:5000/log?limit=3"
+{
+  "confidence": 0.8519,
+  "content_id": "c_ecc830f8dff3",
+  "creator_id": "sophia",
+  "guess": "unsure",
+  "label": "not built yet",
+  "model_score": 0.8519,
+  "style_score": null
+}
+{
+  "count": 2,
+  "entries": [
+    {
+      "combined_score": null,
+      "content_id": "c_73f86a590d74",
+      "creator_id": "demo_instructor",
+      "guess": null,
+      "label": null,
+      "model_score": 0.8217,
+      "status": "decided",
+      "style_score": null,
+      "timestamp": "2026-11-07T22:29:11+00:00"
+    },
+    {
+      "combined_score": null,
+      "content_id": "c_ecc830f8dff3",
+      "creator_id": "sophia",
+      "guess": "unsure",
+      "label": null,
+      "model_score": 0.8519,
+      "status": "decided",
+      "style_score": null,
+      "timestamp": "2026-11-07T23:56:53+00:00"
+    }
+  ]
+}
 
 ```
 
