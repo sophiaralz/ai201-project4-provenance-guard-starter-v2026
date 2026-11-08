@@ -95,7 +95,7 @@ A piece of text goes through seven steps between arriving and getting a label:
      somewhere else, say where. -->
 
 **A case where my two signals split, and what my rule does with it:**
-My own Christmas paragraph ("I am so excited for Christmas! I can't wait to see my family...") got a model_score of 0.89, because the words are very common and easy to predict. Its style_score was only 0.56, because the sentence lengths vary a lot (6, 18, 8 and 5 words). A plain average gives 0.72, which would be labeled AI. The signals are 0.33 apart, more than the 0.30 gap, so the rule caps it at 0.60. That lands in "unsure" instead of "AI". I first planned a gap of 0.35, but testing showed this paragraph sits 0.33 apart and would have slipped through as AI, so I lowered the gap to 0.30. Without the cap, a small change in wording could push a real writer's casual note over the AI line.
+My own Christmas paragraph ("I am so excited for Christmas! I can't wait to see my family...") got a model_score of 0.89, because the words are very common and easy to predict. Its style_score was only 0.56, because the sentence lengths vary a lot (6, 18, 8 and 5 words). A plain average gives 0.72, which would be labeled AI. The signals are 0.33 apart, more than the 0.30 gap, so the rule caps it at 0.60. That lands in "unsure" instead of "AI". I first planned a gap of 0.35, but testing showed this paragraph sits 0.33 apart and would have slipped through as AI, so I lowered the gap to 0.30. Without the cap, a small change in wording could push a real writer's casual note over the AI line. When I resubmitted it with "cannot" instead of "can't", the signals were 0.297 apart, just under the 0.30 gap, so the cap didn't apply and it scored 0.7035, which is labeled AI (see Sample Run). One word was the difference between "unsure" and an accusation. My rule moves the edge, but it doesn't remove it.
 
 **Testing the rule on four inputs:**
 
@@ -234,67 +234,70 @@ $ curl -X POST http://127.0.0.1:5000/submit \
   -d '{"text": "I am so excited for Christmas! I cannot wait to see my family and to drink hot chocolate and watch a movie with them. I also cannot wait to see my cat. I miss her so much.", "creator_id": "sophia"}'
 ```
 
-```curl "http://127.0.0.1:5000/log?limit=3"
+```json
 {
-  "confidence": 0.8519,
-  "content_id": "c_ecc830f8dff3",
+  "confidence": 0.7035,
+  "content_id": "c_e6a6d3c121f4",
   "creator_id": "sophia",
-  "guess": "unsure",
-  "label": "not built yet",
+  "guess": "ai",
+  "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
   "model_score": 0.8519,
-  "style_score": null
+  "style_score": 0.5551
 }
-{
-  "count": 2,
-  "entries": [
-    {
-      "combined_score": null,
-      "content_id": "c_73f86a590d74",
-      "creator_id": "demo_instructor",
-      "guess": null,
-      "label": null,
-      "model_score": 0.8217,
-      "status": "decided",
-      "style_score": null,
-      "timestamp": "2026-11-07T22:29:11+00:00"
-    },
-    {
-      "combined_score": null,
-      "content_id": "c_ecc830f8dff3",
-      "creator_id": "sophia",
-      "guess": "unsure",
-      "label": null,
-      "model_score": 0.8519,
-      "status": "decided",
-      "style_score": null,
-      "timestamp": "2026-11-07T23:56:53+00:00"
-    }
-  ]
-}
-
 ```
+
+This is my own writing, and it was labeled AI. This is the false positive from Milestone 1 happening for real, so it's the one I appealed.
 
 **An appeal**
 
 ```bash
 $ curl -X POST http://127.0.0.1:5000/appeal \
   -H "Content-Type: application/json" \
-  -d '{"content_id": "...", "reasoning": "..."}'
+  -d '{"content_id": "c_e6a6d3c121f4", "reasoning": "I wrote this myself about my own Christmas plans."}'
 ```
 
 ```json
-
+{
+  "content_id": "c_e6a6d3c121f4",
+  "message": "Your appeal was received. A person will review this decision.",
+  "status": "under_review"
+}
 ```
 
 **What the log shows afterwards**
 
 ```bash
-$ curl "http://127.0.0.1:5000/log?limit=3"
+$ curl "http://127.0.0.1:5000/log?limit=2"
 ```
 
 ```json
-
+{
+  "count": 2,
+  "entries": [
+    {
+      "combined_score": 0.7035,
+      "content_id": "c_e6a6d3c121f4",
+      "creator_id": "sophia",
+      "guess": "ai",
+      "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+      "model_score": 0.8519,
+      "status": "decided",
+      "style_score": 0.5551,
+      "timestamp": "2026-11-08T01:11:08+00:00"
+    },
+    {
+      "content_id": "c_e6a6d3c121f4",
+      "creator_id": "sophia",
+      "event": "appeal",
+      "reasoning": "I wrote this myself about my own Christmas plans.",
+      "status": "under_review",
+      "timestamp": "2026-11-08T01:13:29+00:00"
+    }
+  ]
+}
 ```
+
+The original decision stays in the log unchanged, and the appeal is added right after it with the status `under_review`.
 
 ---
 
