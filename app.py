@@ -212,27 +212,40 @@ def submit():
     # step 3 - one real signal that we first tested from the terminal
     # python detector.py "some text"
     import detector
-    model_score = detector.model_signal(text)
-    
-    # step 4 - log the decision. The content_id is what /appeal needs later
+    try:
+        model_score = detector.model_signal(text)
+    except ValueError as exc:
+        # detector raises on text too short to score (fewer than 3 tokens)
+        return jsonify({"error": "too_short", "message": str(exc)}), 400
+
+    # Milestone 4 - second signal, then combine the two
+    import stylometry
+    import scoring
+    style_score = stylometry.style_signal(text)
+    combined = scoring.combine_signals(model_score, style_score)
+
+    # step 4 - log the decision with BOTH signal scores and the combined one.
+    # The content_id is what /appeal needs later
     content_id = f"c_{uuid.uuid4().hex[:12]}"
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
         guess="unsure",
         model_score=model_score,
+        style_score=style_score,
+        combined_score=combined,
         status="decided",
     )
 
-    # step 1 - the route answers. Hardcorded without any logic yet
+    # guess and label are still placeholders until Milestone 5
     return jsonify({
         "content_id": content_id,
         "creator_id": creator_id,
         "guess": "unsure",
-        "confidence": model_score,
+        "confidence": combined,
         "label": "not built yet",
         "model_score": model_score,
-        "style_score": None,
+        "style_score": style_score,
     }), 200
 
 

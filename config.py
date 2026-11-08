@@ -72,7 +72,9 @@ WEIGHT_STYLE_SIGNAL = 0.5
 # that decide who pays for it.
 
 HUMAN_THRESHOLD = 0.35
-AI_THRESHOLD = 0.65
+AI_THRESHOLD = 0.70
+DISAGREEMENT_GAP = 0.30
+DISAGREEMENT_CAP = 0.60
 
 # ⚠️ One thing that catches people out in Milestone 5. A weighted average can
 # only land between its two inputs — so while `style_signal` is still the stub

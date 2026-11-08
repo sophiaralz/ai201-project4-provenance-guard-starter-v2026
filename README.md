@@ -80,18 +80,33 @@ A piece of text goes through seven steps between arriving and getting a label:
 <!-- Write the rule in words, then give the numbers. What happens when the two
      signals disagree? -->
 
-**The rule:**
+**The rule:** Average the two signals equally. But if they disagree by more than 0.30, cap the combined score at 0.60 so it can never reach "high-confidence AI". When two methods disagree that much, the honest answer is "unsure". The cost of false accusation is higher than the cost of letting some AI text through. 
 
 **The numbers:**
+- Model signal weight: 0.5
+- Style signal weight: 0.5
+- Disagreement gap: 0.30 (signals further apart than this count as disagreeing)
+- Disagreement cap: 0.60 (the highest a disagreeing score can go)
+- Below 0.35 = high-confidence human, 0.35-0.70 = unsure, above 0.70 = high-confidence AI
 
-**Where it lives:** `scoring.py::combine_signals`
+**Where it lives:** `scoring.py::combine_signals` (numbers in `config.py`)
 
 <!-- ⚠️ The grader checks your code against that line. If your rule lives
      somewhere else, say where. -->
 
 **A case where my two signals split, and what my rule does with it:**
+My own Christmas paragraph ("I am so excited for Christmas! I can't wait to see my family...") got a model_score of 0.89, because the words are very common and easy to predict. Its style_score was only 0.56, because the sentence lengths vary a lot (6, 18, 8 and 5 words). A plain average gives 0.72, which would be labeled AI. The signals are 0.33 apart, more than the 0.30 gap, so the rule caps it at 0.60. That lands in "unsure" instead of "AI". I first planned a gap of 0.35, but testing showed this paragraph sits 0.33 apart and would have slipped through as AI, so I lowered the gap to 0.30. Without the cap, a small change in wording could push a real writer's casual note over the AI line.
 
+**Testing the rule on four inputs:**
 
+| Input | model_score | style_score | confidence | Label |
+|---|---|---|---|---|
+| Clearly AI (`samples/clearly_ai.json`) | 0.82 | 0.70 | 0.76 | AI |
+| Clearly human (`samples/clearly_human.json`) | 0.47 | 0.12 | 0.30 | human |
+| Human writing, plain and conventional (my Christmas paragraph) | 0.89 | 0.56 | 0.60 (capped) | unsure |
+| Lightly edited AI (the clearly-AI sample with simpler words and one sentence split in two) | 0.69 | 0.42 | 0.56 | unsure |
+
+**What surprised me:** Two things surprised me. First, my real Christmas paragraph scored higher on the model signal (0.89) than the actual AI sample (0.82), and only the disagreement cap keeps it out of the AI label. Second, light editing was enough to dodge the AI label: swapping a few fancy words and splitting one sentence dropped the AI sample from 0.76 (AI) to 0.56 (unsure). My system is better at not accusing real writers than at catching edited AI, which is the trade-off I chose, but I didn't expect either gap to be that big.
 
 ---
 
