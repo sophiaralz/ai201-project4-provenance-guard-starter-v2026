@@ -305,15 +305,15 @@ The original decision stays in the log unchanged, and the appeal is added right 
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I asked Claude to give me an example text for the clearly_ai.json
+- *What came back:* I got a text that is very obviously AI
+- *What I changed:* When I ran the text with detector.py, the number was very close to 1 (meaning the detector determined it was AI written)
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* I asked for help writing the three labels
+- *What came back:* Draft sentences, including "our tools can be wrong" in the AI label, and "this is not an accusation" in the unsure label.
+- *What I changed:* I compared against my fianl text in scoring.py. I dropped "Our tools can be wrong", changed "a person" to "a real person" in the human label to be more specific, and reworded the unsure label to make more sense for the average reader. 
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
