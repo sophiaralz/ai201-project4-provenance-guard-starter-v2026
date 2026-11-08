@@ -223,6 +223,7 @@ def submit():
     import scoring
     style_score = stylometry.style_signal(text)
     combined = scoring.combine_signals(model_score, style_score)
+    guess, label = scoring.score_to_label(combined)
 
     # step 4 - log the decision with BOTH signal scores and the combined one.
     # The content_id is what /appeal needs later
@@ -230,7 +231,8 @@ def submit():
     audit.log_decision(
         content_id=content_id,
         creator_id=creator_id,
-        guess="unsure",
+        guess=guess,
+        label=label,
         model_score=model_score,
         style_score=style_score,
         combined_score=combined,
@@ -241,9 +243,9 @@ def submit():
     return jsonify({
         "content_id": content_id,
         "creator_id": creator_id,
-        "guess": "unsure",
+        "guess": guess,
         "confidence": combined,
-        "label": "not built yet",
+        "label": label,
         "model_score": model_score,
         "style_score": style_score,
     }), 200
@@ -272,12 +274,30 @@ def appeal():
     """
     payload = request.get_json(silent=True) or {}
 
-    # TODO: delete this and build the route.
+    content_id = payload.get("content_id")
+    reasoning = payload.get("reasoning")
+
+    # 400 - both fields are required and must not be empty
+    if not isinstance(content_id, str) or not content_id.strip() \
+            or not isinstance(reasoning, str) or not reasoning.strip():
+        return jsonify({"error": "bad_request",
+                        "message": "Send JSON with a non-empty \"content_id\" and \"reasoning\"."}), 400
+
+    # 404 - the content_id has to match a real submission
+    entries = audit.entries_for(content_id)
+    if not entries:
+        return jsonify({"error": "not_found",
+                        "message": f"No submission with content_id {content_id}."}), 404
+
+    # record the appeal next to the original decision (status -> under_review)
+    creator_id = payload.get("creator_id") or entries[0].get("creator_id", "unknown")
+    audit.log_appeal(content_id=content_id, creator_id=creator_id, reasoning=reasoning)
+
     return jsonify({
-        "error": "not_implemented",
-        "message": "POST /appeal isn't built yet — see the TODO in app.py.",
-        "you_sent": payload,
-    }), 501
+        "content_id": content_id,
+        "status": "under_review",
+        "message": "Your appeal was received. A person will review this decision.",
+    }), 200
 
 
 # ── Already works ─────────────────────────────────────────────────────────────

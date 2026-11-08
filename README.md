@@ -201,16 +201,16 @@ My own Christmas paragraph ("I am so excited for Christmas! I can't wait to see 
 
 | Label | Score range | The exact text a reader sees |
 |---|---|---|
-| high-confidence human |  |  |
-| unsure |  |  |
-| high-confidence AI |  |  |
+| high-confidence human | 0.00 - 0.35 |This reads like it was written by a real person.  |
+| unsure | 0.35 - 0.70 | We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it. |
+| high-confidence AI | 0.70 - 1.00 | This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it. |
 
 **Why I worded the "unsure" one this way:**
 <!-- It's the hardest of the three. It has to admit uncertainty without
      sounding like an accusation, because the person reading it may well have
      written every word themselves. -->
 
-
+I wrote "unsure" this way because I wanted to make sure that the person reading it doesn't think that I am accusing them of using AI. I let them know that this happens often because AI can't detect plain, everyday writing well from AI-written or human-written. 
 
 ---
 
