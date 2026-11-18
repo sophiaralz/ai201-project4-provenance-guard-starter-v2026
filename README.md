@@ -463,17 +463,437 @@ FP03: a non-native English speaker's careful writing was labelled "strong signs 
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. My own writing labelled high-confidence AI | ≤ 1 of 10 | 3/10 | 3/10 | 3/10 | MISSED |
+| 2. Clearly-AI avg minus clearly-human avg | ≥ 0.30 | 0.26 | 0.26 | 0.26 | MISSED |
+| 3. Labels produced by at least 2 inputs | 3 of 3 | 1/3 | 1/3 | 1/3 | MISSED |
+| 4. Valid appeals → under_review + in /log; fake ids → 404 | 20 of 20 | 20/20 | 20/20 | 20/20 | MET |
+| 5. Missing / empty / whitespace / >50k text → 4xx with message | 4 of 4 | 3/4 | 3/4 | 3/4 | MISSED |
 
 **Real output from one trial**, pasted as text, naming the file and function
 that produced it:
 
-```json
+From `results/run_2026-11-18_0307_before.md`, Trial 1 (all three trials were identical).
 
+*Criterion 1 — my own writing* — produced by `run_eval.py::main` → `app.py::submit` (scenario in `scenarios.py`, "my own writing"). Pieces 3, 6 and 8 came back `ai`.
+
+```json
+[
+  {
+    "status": 200,
+    "content_id": "c_0ff129e755e4",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.6,
+    "model_score": 0.89,
+    "style_score": 0.5551,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "I am so excited for Christmas! I can't wait to see my family and to dr"
+  },
+  {
+    "status": 200,
+    "content_id": "c_15a898848022",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.5698,
+    "model_score": 0.406,
+    "style_score": 0.7337,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "Today I played tennis with my fromer opponent. We played for so long. "
+  },
+  {
+    "status": 200,
+    "content_id": "c_6aee9998ac9f",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.7835,
+    "model_score": 0.7825,
+    "style_score": 0.7846,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "I will gladly take your ice cream. Thank you for offering it to me. I "
+  },
+  {
+    "status": 200,
+    "content_id": "c_8caec29f2701",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.4758,
+    "model_score": 0.2268,
+    "style_score": 0.7247,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "Ughh I wish winter break could start already! I am so excited to see m"
+  },
+  {
+    "status": 200,
+    "content_id": "c_86cf1cba3a05",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.5999,
+    "model_score": 0.7922,
+    "style_score": 0.4077,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "My cat's name is Massia. She is almost 10 years old, but she still act"
+  },
+  {
+    "status": 200,
+    "content_id": "c_58beda653c5d",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.796,
+    "model_score": 0.9342,
+    "style_score": 0.6578,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "I am getting ready to go to bed, but I still have a lot of work to do."
+  },
+  {
+    "status": 200,
+    "content_id": "c_36cbae6d054f",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.4759,
+    "model_score": 0.4553,
+    "style_score": 0.4965,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "I am an undergraduate CS student. What about you? Do you like your maj"
+  },
+  {
+    "status": 200,
+    "content_id": "c_3567a7f4632f",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.7705,
+    "model_score": 0.7259,
+    "style_score": 0.8151,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "In general, I think that a lot of students in this generation feel a l"
+  },
+  {
+    "status": 200,
+    "content_id": "c_5163adac56ad",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.4868,
+    "model_score": 0.771,
+    "style_score": 0.2026,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "Can you take me to Disneyland? I really want to ride the rollercoaster"
+  },
+  {
+    "status": 200,
+    "content_id": "c_833a44e8d1f9",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.6,
+    "model_score": 0.8067,
+    "style_score": 0.433,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "I really like learning about Artificial Intelligence. It is kind of ha"
+  }
+]
+```
+
+*Criterion 2 — score spread* — produced by `run_eval.py::main` → `app.py::submit`. First five are AI (avg confidence 0.790), last three human (avg 0.526); gap 0.264.
+
+```json
+[
+  {
+    "status": 200,
+    "content_id": "c_6c66db86c3cd",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.7613,
+    "model_score": 0.8217,
+    "style_score": 0.701,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "Artificial intelligence has emerged as a transformative force across n"
+  },
+  {
+    "status": 200,
+    "content_id": "c_8b9798da0ae1",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.6835,
+    "model_score": 0.6395,
+    "style_score": 0.7276,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "Remote work has fundamentally reshaped the modern workplace. By elimin"
+  },
+  {
+    "status": 200,
+    "content_id": "c_1a8b867ab6dc",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.8579,
+    "model_score": 0.9312,
+    "style_score": 0.7847,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "Climate change represents one of the most pressing challenges of our t"
+  },
+  {
+    "status": 200,
+    "content_id": "c_d1ee8e9881db",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.8242,
+    "model_score": 0.9338,
+    "style_score": 0.7147,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "Regular physical activity offers a wide range of benefits for both phy"
+  },
+  {
+    "status": 200,
+    "content_id": "c_c6ed0e253c9d",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.8245,
+    "model_score": 0.7804,
+    "style_score": 0.8685,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "Effective time management is an essential skill in both professional a"
+  },
+  {
+    "status": 200,
+    "content_id": "c_38c114a810a2",
+    "error": null,
+    "message": null,
+    "guess": "human",
+    "confidence": 0.2984,
+    "model_score": 0.4725,
+    "style_score": 0.1244,
+    "label": "This reads like it was written by a real person.",
+    "sent": "I didn't sleep. Not properly, anyway - I lay there listening to the bo"
+  },
+  {
+    "status": 200,
+    "content_id": "c_b002c0d8111a",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.68,
+    "model_score": 0.6175,
+    "style_score": 0.7425,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "We got to the campsite about four. The pitch was fine, a bit sloped, b"
+  },
+  {
+    "status": 200,
+    "content_id": "c_2948f7ff22f0",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.6,
+    "model_score": 0.89,
+    "style_score": 0.5551,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "I am so excited for Christmas! I can't wait to see my family and to dr"
+  }
+]
+```
+
+*Criterion 3 — label coverage* — produced by `run_eval.py::main` → `app.py::submit`. `ai` ×1, `unsure` ×4, `human` ×1.
+
+```json
+[
+  {
+    "status": 200,
+    "content_id": "c_77547969182c",
+    "error": null,
+    "message": null,
+    "guess": "ai",
+    "confidence": 0.7613,
+    "model_score": 0.8217,
+    "style_score": 0.701,
+    "label": "This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it.",
+    "sent": "Artificial intelligence has emerged as a transformative force across n"
+  },
+  {
+    "status": 200,
+    "content_id": "c_ccc81299f25d",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.6835,
+    "model_score": 0.6395,
+    "style_score": 0.7276,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "Remote work has fundamentally reshaped the modern workplace. By elimin"
+  },
+  {
+    "status": 200,
+    "content_id": "c_ab5c07d60018",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.4275,
+    "model_score": 0.3109,
+    "style_score": 0.5442,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "Time management matters more than people admit, especially now that wo"
+  },
+  {
+    "status": 200,
+    "content_id": "c_f6da2b4b95e7",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.6,
+    "model_score": 0.89,
+    "style_score": 0.5551,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "I am so excited for Christmas! I can't wait to see my family and to dr"
+  },
+  {
+    "status": 200,
+    "content_id": "c_f36bbb018e60",
+    "error": null,
+    "message": null,
+    "guess": "human",
+    "confidence": 0.2984,
+    "model_score": 0.4725,
+    "style_score": 0.1244,
+    "label": "This reads like it was written by a real person.",
+    "sent": "I didn't sleep. Not properly, anyway - I lay there listening to the bo"
+  },
+  {
+    "status": 200,
+    "content_id": "c_dd228542a36b",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.68,
+    "model_score": 0.6175,
+    "style_score": 0.7425,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "We got to the campsite about four. The pitch was fine, a bit sloped, b"
+  }
+]
+```
+
+*Criterion 4 — appeal path* — produced by `run_eval.py::run_appeals` → `app.py::submit`, `app.py::appeal`, then `GET /log`. Excerpt: 3 of the 10 valid appeals and 3 of the 10 fake ids; all 20 passed, full output in `results/run_2026-11-18_0307_before.md`.
+
+```json
+[
+  {
+    "kind": "valid",
+    "sent": "Artificial intelligence has emerged as a transformative force across n",
+    "submit_status": 200,
+    "content_id": "c_a4fa91775dac",
+    "appeal_status": 200,
+    "status": "under_review",
+    "in_log": true,
+    "passed": true
+  },
+  {
+    "kind": "valid",
+    "sent": "Remote work has fundamentally reshaped the modern workplace. By elimin",
+    "submit_status": 200,
+    "content_id": "c_8e8c324b89d7",
+    "appeal_status": 200,
+    "status": "under_review",
+    "in_log": true,
+    "passed": true
+  },
+  {
+    "kind": "valid",
+    "sent": "Climate change represents one of the most pressing challenges of our t",
+    "submit_status": 200,
+    "content_id": "c_73230e671cca",
+    "appeal_status": 200,
+    "status": "under_review",
+    "in_log": true,
+    "passed": true
+  },
+  {
+    "kind": "fake",
+    "content_id": "c_fake101notreal",
+    "appeal_status": 404,
+    "error": "not_found",
+    "passed": true
+  },
+  {
+    "kind": "fake",
+    "content_id": "c_fake102notreal",
+    "appeal_status": 404,
+    "error": "not_found",
+    "passed": true
+  },
+  {
+    "kind": "fake",
+    "content_id": "c_fake103notreal",
+    "appeal_status": 404,
+    "error": "not_found",
+    "passed": true
+  }
+]
+```
+
+*Criterion 5 — bad input* — produced by `run_eval.py::main` → `app.py::submit`. The 60,000-character body came back 200 with a decision instead of a 4xx.
+
+```json
+[
+  {
+    "status": 400,
+    "content_id": null,
+    "error": "bad_request",
+    "message": "Send JSON with a non-empty \"text\".",
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "{\"creator_id\": \"eval_bad_missing\"}"
+  },
+  {
+    "status": 400,
+    "content_id": null,
+    "error": "bad_request",
+    "message": "Send JSON with a non-empty \"text\".",
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "(empty text)"
+  },
+  {
+    "status": 400,
+    "content_id": null,
+    "error": "bad_request",
+    "message": "Send JSON with a non-empty \"text\".",
+    "guess": null,
+    "confidence": null,
+    "model_score": null,
+    "style_score": null,
+    "label": null,
+    "sent": "   \n\t  "
+  },
+  {
+    "status": 200,
+    "content_id": "c_79ca7d56b5ed",
+    "error": null,
+    "message": null,
+    "guess": "unsure",
+    "confidence": 0.6,
+    "model_score": 0.985,
+    "style_score": 0.4,
+    "label": "We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it.",
+    "sent": "We got to the campsite about four. The pitch was fine, a bit sloped, b"
+  }
+]
 ```
 
 **Diagnoses**

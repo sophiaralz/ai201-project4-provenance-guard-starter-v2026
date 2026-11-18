@@ -111,6 +111,15 @@ def main():
         print(f"\n{scenario['name']}  (criterion {scenario.get('criterion') or '—'})")
 
         trials = []
+        if scenario.get("appeals"):
+            for trial in range(1, args.trials + 1):
+                results = run_appeals(requests, args, scenario, trial)
+                trials.append(results)
+                print(f"  trial {trial}: " + ", ".join(
+                    "ok" if r.get("passed") else "FAIL" for r in results))
+            rows.append({"scenario": scenario, "trials": trials})
+            continue
+
         for trial in range(1, args.trials + 1):
             results = []
             for i, body in enumerate(bodies_for(scenario), 1):
@@ -121,6 +130,9 @@ def main():
                     payload = response.json() if response.content else {}
                     results.append({
                         "status": response.status_code,
+                        "content_id": payload.get("content_id"),
+                        "error": payload.get("error"),
+                        "message": payload.get("message"),
                         "guess": payload.get("guess"),
                         "confidence": payload.get("confidence"),
                         "model_score": payload.get("model_score"),
@@ -139,6 +151,62 @@ def main():
         rows.append({"scenario": scenario, "trials": trials})
 
     write_report(rows, args)
+
+
+def run_appeals(requests, args, scenario, trial):
+    """
+    The appeal path, which can't be tested by sending text alone.
+
+    Valid appeals: submit a text, appeal the content_id that came back, then
+    check /log for an `appeal` entry with status `under_review` for that id.
+    Passes when the appeal returns 200 + under_review AND the log shows it.
+
+    Fake appeals: appeal a content_id that was never issued. Passes on a 404.
+
+    Every submission gets its own creator_id so the rate limiter never counts
+    the test against itself.
+    """
+    spec = scenario["appeals"]
+    results = []
+
+    for i, text in enumerate(spec["texts"], 1):
+        result = {"kind": "valid", "sent": text[:70]}
+        try:
+            sub = requests.post(f"{args.url}/submit", timeout=args.timeout, json={
+                "text": text, "creator_id": f"eval_appeal_t{trial}_{i}"})
+            content_id = sub.json().get("content_id")
+            result.update(submit_status=sub.status_code, content_id=content_id)
+
+            app = requests.post(f"{args.url}/appeal", timeout=args.timeout, json={
+                "content_id": content_id,
+                "reasoning": "I wrote this myself. (eval run, criterion 4)"})
+            body = app.json()
+            result.update(appeal_status=app.status_code, status=body.get("status"))
+
+            log = requests.get(f"{args.url}/log", timeout=args.timeout).json()
+            appeals = [e for e in log.get("entries", [])
+                       if e.get("content_id") == content_id and e.get("event") == "appeal"]
+            result["in_log"] = bool(appeals) and appeals[-1].get("status") == "under_review"
+            result["passed"] = (app.status_code == 200
+                                and body.get("status") == "under_review"
+                                and result["in_log"])
+        except Exception as exc:  # noqa: BLE001
+            result.update(error=f"{type(exc).__name__}: {exc}", passed=False)
+        results.append(result)
+
+    for i in range(1, spec["fake"] + 1):
+        fake_id = f"c_fake{trial}{i:02d}notreal"
+        result = {"kind": "fake", "content_id": fake_id}
+        try:
+            app = requests.post(f"{args.url}/appeal", timeout=args.timeout, json={
+                "content_id": fake_id, "reasoning": "This id was never issued."})
+            result.update(appeal_status=app.status_code, error=app.json().get("error"),
+                          passed=app.status_code == 404)
+        except Exception as exc:  # noqa: BLE001
+            result.update(error=f"{type(exc).__name__}: {exc}", passed=False)
+        results.append(result)
+
+    return results
 
 
 def write_report(rows, args):
