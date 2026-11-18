@@ -72,7 +72,7 @@ WEIGHT_STYLE_SIGNAL = 0.5
 # that decide who pays for it.
 
 HUMAN_THRESHOLD = 0.35
-AI_THRESHOLD = 0.70
+AI_THRESHOLD = 0.80  # Unit 8 M5: was 0.70. Diagnosis #1 — plain human writing scored 0.77–0.86.
 DISAGREEMENT_GAP = 0.30
 DISAGREEMENT_CAP = 0.60
 
