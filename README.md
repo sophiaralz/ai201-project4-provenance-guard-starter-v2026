@@ -87,7 +87,7 @@ A piece of text goes through seven steps between arriving and getting a label:
 - Style signal weight: 0.5
 - Disagreement gap: 0.30 (signals further apart than this count as disagreeing)
 - Disagreement cap: 0.60 (the highest a disagreeing score can go)
-- Below 0.35 = high-confidence human, 0.35-0.70 = unsure, above 0.70 = high-confidence AI
+- Below 0.35 = high-confidence human, 0.35-0.80 = unsure, above 0.80 = high-confidence AI (0.70 before the Milestone 5 change)
 
 **Where it lives:** `scoring.py::combine_signals` (numbers in `config.py`)
 
@@ -202,8 +202,8 @@ My own Christmas paragraph ("I am so excited for Christmas! I can't wait to see 
 | Label | Score range | The exact text a reader sees |
 |---|---|---|
 | high-confidence human | 0.00 - 0.35 |This reads like it was written by a real person.  |
-| unsure | 0.35 - 0.70 | We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it. |
-| high-confidence AI | 0.70 - 1.00 | This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it. |
+| unsure | 0.35 - 0.80 (0.70 before the Milestone 5 change) | We can't tell whether a person or AI wrote this. That happens a lot with plain, everyday writing, so it is not an accusation. If you wrote it yourself, you can ask a person to review it. |
+| high-confidence AI | 0.80 - 1.00 (0.70 before the Milestone 5 change) | This shows strong signs of being written by AI. If you wrote it yourself, you can appeal and a person will review it. |
 
 **Why I worded the "unsure" one this way:**
 <!-- It's the hardest of the three. It has to admit uncertainty without
@@ -314,6 +314,12 @@ The original decision stays in the log unchanged, and the appeal is added right 
 - *What I asked for:* I asked for help writing the three labels
 - *What came back:* Draft sentences, including "our tools can be wrong" in the AI label, and "this is not an accusation" in the unsure label.
 - *What I changed:* I compared against my fianl text in scoring.py. I dropped "Our tools can be wrong", changed "a person" to "a real person" in the human label to be more specific, and reworded the unsure label to make more sense for the average reader. 
+
+**Moment 3**
+
+- *What I asked for:* I asked for help building scenarios.py for my five criteria.
+- *What came back:* Scenarios for four criteria, AI-written paragraphs for the AI side, and an extension to run_eval.py so the appeal path could be tested automatically.
+- *What I changed:* I wrote all 10 pieces for criterion 1 myself and chose the Christmas paragraph as my most personal one. 
 
 <!-- ═══════════════════════ UNIT 8 — THE TEST ═══════════════════════ -->
 
@@ -468,6 +474,13 @@ FP03: a non-native English speaker's careful writing was labelled "strong signs 
 | 3. Labels produced by at least 2 inputs | 3 of 3 | 1/3 | 1/3 | 1/3 | MISSED |
 | 4. Valid appeals → under_review + in /log; fake ids → 404 | 20 of 20 | 20/20 | 20/20 | 20/20 | MET |
 | 5. Missing / empty / whitespace / >50k text → 4xx with message | 4 of 4 | 3/4 | 3/4 | 3/4 | MISSED |
+
+**How I decided:**
+1. **MISSED:** 3 of my 10 pieces were labelled AI in every trial, and the target allows at most 1.
+2. **MISSED:** the AI average minus the human average was 0.26 in all three trials, below the 0.30 target.
+3. **MISSED:** only "unsure" came from 2 or more inputs. "ai" and "human" each came from just one, so 1 of 3 in every trial.
+4. **MET:** all 10 valid appeals moved to under_review and showed up in /log, and all 10 fake ids got a 404, in all three trials (20/20 each time).
+5. **MISSED:** the 60,000-character body got a 200 in every trial, so only 3 of 4 bad inputs got a 4xx.
 
 **Real output from one trial**, pasted as text, naming the file and function
 that produced it:
@@ -1049,12 +1062,30 @@ I know because the before and after runs used the same inputs. All three trials 
 <!-- For each attack still getting through and each criterion still missed:
      what you'd do, and why you stopped. -->
 
+After the change, 20 attacks still break and criteria 2, 3 and 5 are still missed. They fall into the same four groups as my diagnoses. I stopped after one change because the milestone asks for one measured change, and I picked the one that was hurting real writers.
 
+**1. Plain human writing still scored as AI: FP02–FP05, criterion 2, and the "human" side of criterion 3.**
+What I'd do: fix signal two. My punctuation measure ignores full stops, so plain writing gets the maximum AI score on that part. I'd count full stops, or replace punctuation with a measure that doesn't punish simple writing. Then I'd re-check every threshold, because changing a signal moves every score.
+Why I stopped: it's a bigger change than a threshold, and it would need its own before/after run to tell its effect apart from the threshold change.
+
+**2. Evasions still get through: EV01–EV09 and the "ai" side of criterion 3.**
+What I'd do: probably nothing quickly. Labelling more of them AI means lowering the threshold or trusting one signal alone, and both bring back the false accusations I just fixed. A real fix needs a third signal that the evasions don't beat.
+Why I stopped: this is the trade I chose on purpose (see below), not something I ran out of time for.
+
+**3. Non-prose input gets a confident label: MF03, MF05, MF06 and MF07.**
+What I'd do: in the route, reject text with fewer than a few scorable words (400, "not enough text to check"). I'd also make signal two return a neutral 0.5 instead of 0.70 when it finds no words.
+Why I stopped: one change per milestone. This is the next one I'd make.
+
+**4. The route doesn't check the request: criterion 5, MF08, RQ06 and RQ07.**
+What I'd do: in `app.py::submit`, return 400 if the body isn't a JSON object (stops the RQ07 crash), 400 if `creator_id` isn't a string (RQ06), and 413 if `text` is over 50,000 characters (criterion 5 and MF08). These are a few lines each.
+Why I stopped: same reason, one change. These are the easiest fixes left, and the only ones with no trade-off.
 
 **The trade I'd make if this ran for real:**
 
 <!-- Two sentences. Fewer wrong accusations means more AI text getting through.
      Say which way you'd go and WHO PAYS FOR IT. -->
+
+I'd keep choosing fewer wrong accusations, because a false "AI" label lands on one real person who has to prove they wrote their own work, while a missed AI text costs the site a little. The people who pay are the honest writers who compete with AI text that slips through, and readers who can trust an "unsure" label less.
 
 
 
