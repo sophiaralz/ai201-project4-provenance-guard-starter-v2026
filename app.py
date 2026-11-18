@@ -151,7 +151,7 @@ def health():
 # ── YOU BUILD THIS ────────────────────────────────────────────────────────────
 
 @app.post("/submit")
-# @limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
+@limiter.limit(f"{config.RATE_LIMIT_PER_MINUTE}/minute;{config.RATE_LIMIT_PER_DAY}/day")
 def submit():
     """
     Take a piece of text, decide about it, log the decision, answer.
@@ -207,6 +207,7 @@ def submit():
 
     # step 2 - JSON goes in: pull text and creator_id out of the body
     if not isinstance(text, str) or not text.strip():
+        audit.log_rejection(creator_id, reason="missing_text", http_status=400)
         return jsonify({"error": "bad_request", "message": "Send JSON with a non-empty \"text\"."}), 400
     
     # step 3 - one real signal that we first tested from the terminal
@@ -216,6 +217,8 @@ def submit():
         model_score = detector.model_signal(text)
     except ValueError as exc:
         # detector raises on text too short to score (fewer than 3 tokens)
+        audit.log_rejection(creator_id, reason="too_short", http_status=400,
+                            text_length=len(text))
         return jsonify({"error": "too_short", "message": str(exc)}), 400
 
     # Milestone 4 - second signal, then combine the two

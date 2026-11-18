@@ -321,7 +321,8 @@ The original decision stays in the log unchanged, and the appeal is added right 
 
 ## Rate Limiting
 
-**My limits:** ___ per minute, ___ per day
+
+**My limits:** _5_ per minute, _50_ per day
 
 **Why those numbers and not others:**
 <!-- Think about two people: a real writer submitting their own work a few
@@ -329,15 +330,22 @@ The original decision stays in the log unchanged, and the appeal is added right 
      thresholds. Your numbers have to be liveable for the first and hostile to
      the second. -->
 
+A real writer checking their own work rarely sends more than a few pieces a minute or a dozen a day, so 5 a minute and 50 a day never gets in their way. A script trying to find my thresholds needs about 1,000 tries, and at 50 a day that takes 20 days. Going any lower would start blocking honest writers.
+
+
 **What a caller counts as:** <!-- per address, or per creator_id? They fail
 differently — one script can look like a thousand callers, and one household
 can look like one. -->
+
+Per creator_id, fall back to IP address if there isn't one. The weakness is that one script can make up a new creator_id for every request and look like a thousand different callers. 
 
 **The run of status codes when I pushed past it:**
 
 <!-- python run_attacks.py --flood 15 -->
 
 ```
+
+200 200 200 200 200 429 429 429 429 429 429 429 429 429 429
 
 ```
 
