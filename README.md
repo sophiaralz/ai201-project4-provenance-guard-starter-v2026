@@ -912,6 +912,24 @@ From `results/run_2026-11-18_0307_before.md`, Trial 1 (all three trials were ide
 
      Look for a pattern. Five failures on one signal is one problem, not five. -->
 
+All three trials were identical, so every miss is consistent. The 4 missed criteria and 20 broken attacks come from four problems.
+
+**1. Both signals reward plain writing (signal one + signal two).** Explains criterion 1, criterion 2, the human side of criterion 3, and FP02–FP06.
+Signal one (gpt2 perplexity) scores common, predictable words as AI. Signal two scores even sentence lengths and few commas or dashes as AI. My punctuation measure ignores full stops, which is most of what plain writers use. So in plain human writing the two signals agree, and the combining rule has nothing to soften. Three of my own pieces were labelled AI: ice cream (0.78 / 0.78), all-nighter (0.93 / 0.66) and job market (0.73 / 0.82). FP02–FP05 scored 0.74–0.83 on signal one and 0.83–0.96 on signal two, and FP06 followed the same pattern (0.88 / 0.68). The plain campsite passage (0.68) also raised the human average, so the gap between AI and human was 0.26 instead of 0.30. Only text with very uneven sentences and lots of punctuation could reach "human".
+
+**2. The AI label needs both signals high, so fooling one is enough (combining rule).** Explains 8 evasions and the AI side of criterion 3.
+I average the two signals and cap the score at 0.60 when they're more than 0.30 apart, so reaching "ai" (≥ 0.70) needs both signals high. Breaking up sentences or adding punctuation (EV02, EV06, EV07) dropped signal two to 0.30–0.39. Typos and very short text (EV01, EV08) dropped signal one to 0.16–0.25. A pasted quote or a human opening (EV03, EV09) lowered both a little, and a heavy human edit (EV05) lowered both enough to reach "human". My second AI paragraph averaged 0.68, just under 0.70. I chose this rule so real writers aren't accused, and the cost is that AI text is easy to slip through.
+
+**3. Signal two has no "can't measure" answer (signal two).** Explains MF03, MF05, MF06 and MF07.
+My word regex only matches `a-z0-9'`, so emoji and Arabic count as zero words, and signal two then defaults to 0.70, which leans AI. Signal one also scores those inputs as very predictable (0.91–0.99), so emoji and Arabic text were labelled AI. With ANSI control codes it went the other way: signal one gave 0.0, the two signals averaged exactly 0.35, and `<=` made it "human".
+
+**4. The route doesn't check the request (route).** Explains criterion 5, MF08, RQ06 and RQ07.
+There's no length limit, so 60,000 characters came back 200. The detector quietly truncates to 400 tokens, and repeated human text scored 0.99 (MF08). A JSON array body crashed `payload.get` with a 500 and left no audit log entry (RQ07). A `creator_id` that is an object was logged as an object (RQ06).
+
+**Biggest problem:** #1, because it accuses real writers. It caused my worst outcome (FP03) and 3 of my own 10 pieces.
+
+**Revisions:** none. All five criteria were measurable, and I kept the targets I missed.
+
 
 
 ---
